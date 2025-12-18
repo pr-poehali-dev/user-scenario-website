@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 interface User {
   name: string;
   email: string;
+  password: string;
 }
 
 interface MoodEntry {
@@ -63,6 +64,11 @@ const tests = [
       'Мне трудно расслабиться',
       'Я быстро устаю',
       'У меня бывает учащенное сердцебиение',
+      'Мне сложно сосредоточиться из-за тревоги',
+      'Я избегаю ситуаций, которые вызывают беспокойство',
+      'У меня бывают проблемы со сном из-за тревожных мыслей',
+      'Я чувствую напряжение в мышцах',
+      'Мне трудно контролировать свои переживания',
     ],
   },
   {
@@ -74,6 +80,11 @@ const tests = [
       'Я раздражаюсь по мелочам',
       'Мне сложно концентрироваться',
       'Я избегаю общения с людьми',
+      'У меня часто болит голова или другие части тела',
+      'Я чувствую постоянную усталость',
+      'Мне трудно принимать решения',
+      'Я стал(а) более забывчивым(ой)',
+      'Я чувствую себя подавленным(ой)',
     ],
   },
   {
@@ -85,6 +96,27 @@ const tests = [
       'Я циничен по отношению к своим обязанностям',
       'У меня снизилась продуктивность',
       'Я чувствую себя опустошенным',
+      'Мне трудно найти мотивацию начать работу',
+      'Я отстраняюсь от коллег и клиентов',
+      'Я сомневаюсь в ценности своей работы',
+      'Даже после отдыха я чувствую усталость',
+      'Я стал(а) более раздражительным(ой) на работе',
+    ],
+  },
+  {
+    id: 'depression',
+    name: 'Тест на депрессию',
+    questions: [
+      'Я часто чувствую грусть или подавленность',
+      'Я потерял(а) интерес к вещам, которые раньше приносили радость',
+      'У меня изменился аппетит (увеличился или уменьшился)',
+      'У меня проблемы со сном (бессонница или избыточный сон)',
+      'Я чувствую усталость и нехватку энергии',
+      'Я испытываю чувство вины или бесполезности',
+      'Мне трудно концентрироваться на задачах',
+      'Я двигаюсь или говорю медленнее обычного',
+      'У меня возникают мысли о смерти или самоповреждении',
+      'Я чувствую безнадежность по поводу будущего',
     ],
   },
 ];
@@ -94,16 +126,30 @@ const techniques: Technique[] = [
     id: '1',
     title: 'Дыхание 4-7-8',
     category: 'Дыхательные практики',
-    description: 'Техника глубокого дыхания для быстрого успокоения',
+    description: 'Техника глубокого дыхания для быстрого успокоения и снижения тревоги',
     instructions: [
       'Вдохните через нос на 4 счета',
       'Задержите дыхание на 7 счетов',
       'Выдохните через рот на 8 счетов',
-      'Повторите 4 раза',
+      'Повторите цикл 4 раза',
+      'Практикуйте 2 раза в день для лучшего эффекта',
     ],
   },
   {
     id: '2',
+    title: 'Квадратное дыхание',
+    category: 'Дыхательные практики',
+    description: 'Простая техника для восстановления баланса и концентрации',
+    instructions: [
+      'Вдохните на 4 счета',
+      'Задержите дыхание на 4 счета',
+      'Выдохните на 4 счета',
+      'Задержите дыхание на 4 счета',
+      'Повторяйте в течение 5 минут',
+    ],
+  },
+  {
+    id: '3',
     title: 'Прогрессивная мышечная релаксация',
     category: 'Релаксация',
     description: 'Снятие физического напряжения через последовательное расслабление мышц',
@@ -113,13 +159,27 @@ const techniques: Technique[] = [
       'Двигайтесь вверх по телу: икры, бедра, живот',
       'Продолжайте с руками, плечами, шеей и лицом',
       'Почувствуйте разницу между напряжением и расслаблением',
+      'Завершите глубоким дыханием',
     ],
   },
   {
-    id: '3',
+    id: '4',
+    title: 'Визуализация безопасного места',
+    category: 'Релаксация',
+    description: 'Создание мысленного убежища для снижения стресса',
+    instructions: [
+      'Закройте глаза и сделайте несколько глубоких вдохов',
+      'Представьте место, где вы чувствуете себя в безопасности',
+      'Добавьте детали: цвета, звуки, запахи, ощущения',
+      'Проведите в этом месте 5-10 минут',
+      'Медленно вернитесь в настоящий момент',
+    ],
+  },
+  {
+    id: '5',
     title: 'Заземление 5-4-3-2-1',
     category: 'Осознанность',
-    description: 'Техника для возвращения в настоящий момент',
+    description: 'Техника для возвращения в настоящий момент при тревоге или панике',
     instructions: [
       'Назовите 5 вещей, которые вы видите',
       'Назовите 4 вещи, которые вы можете потрогать',
@@ -129,22 +189,102 @@ const techniques: Technique[] = [
     ],
   },
   {
-    id: '4',
+    id: '6',
+    title: 'Сканирование тела',
+    category: 'Осознанность',
+    description: 'Медитативная практика для повышения осознанности телесных ощущений',
+    instructions: [
+      'Лягте или сядьте в удобной позе',
+      'Направьте внимание на макушку головы',
+      'Медленно перемещайте внимание вниз по телу',
+      'Замечайте ощущения без оценки',
+      'Проведите 10-15 минут на практику',
+    ],
+  },
+  {
+    id: '7',
     title: 'Позитивные аффирмации',
     category: 'Когнитивные техники',
-    description: 'Укрепление позитивного мышления',
+    description: 'Укрепление позитивного мышления через самоутверждающие фразы',
     instructions: [
       'Выберите спокойное место',
       'Повторяйте: "Я достоин любви и уважения"',
       'Повторяйте: "Я справляюсь с трудностями"',
       'Повторяйте: "Я позволяю себе отдыхать"',
       'Произносите каждую фразу медленно и осознанно',
+      'Практикуйте утром и вечером',
+    ],
+  },
+  {
+    id: '8',
+    title: 'Дневник благодарности',
+    category: 'Когнитивные техники',
+    description: 'Фокусировка на положительных аспектах жизни',
+    instructions: [
+      'Каждый вечер записывайте 3 вещи, за которые вы благодарны',
+      'Описывайте детали и свои чувства',
+      'Включайте как большие, так и маленькие радости',
+      'Перечитывайте записи в трудные дни',
+      'Делайте это регулярно минимум неделю',
+    ],
+  },
+  {
+    id: '9',
+    title: 'Техника остановки мысли',
+    category: 'Когнитивные техники',
+    description: 'Прерывание негативных мыслительных паттернов',
+    instructions: [
+      'Когда заметите негативную мысль, скажите себе "Стоп!"',
+      'Представьте знак остановки или красный свет',
+      'Сделайте глубокий вдох',
+      'Замените мысль на более реалистичную или позитивную',
+      'Повторяйте по необходимости',
+    ],
+  },
+  {
+    id: '10',
+    title: 'Прогулка на природе',
+    category: 'Физическая активность',
+    description: 'Использование природы для восстановления ментального здоровья',
+    instructions: [
+      'Найдите парк или зеленую зону',
+      'Гуляйте минимум 20-30 минут',
+      'Обращайте внимание на природу вокруг',
+      'Дышите свежим воздухом осознанно',
+      'Оставьте телефон в кармане',
+    ],
+  },
+  {
+    id: '11',
+    title: 'Йога для начинающих',
+    category: 'Физическая активность',
+    description: 'Мягкие упражнения для тела и ума',
+    instructions: [
+      'Начните с простых поз: собака мордой вниз, поза ребенка',
+      'Удерживайте каждую позу 5-10 вдохов',
+      'Двигайтесь медленно и осознанно',
+      'Слушайте свое тело, не перенапрягайтесь',
+      'Практикуйте 15-20 минут ежедневно',
+    ],
+  },
+  {
+    id: '12',
+    title: 'Творческое выражение',
+    category: 'Творчество',
+    description: 'Выражение эмоций через искусство',
+    instructions: [
+      'Выберите форму: рисование, письмо, музыка, танец',
+      'Не оценивайте результат, фокусируйтесь на процессе',
+      'Позвольте эмоциям выразиться свободно',
+      'Уделяйте этому 20-30 минут',
+      'Делайте регулярно для снятия напряжения',
     ],
   },
 ];
 
 function Index() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   
@@ -163,35 +303,99 @@ function Index() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const savedMoods = localStorage.getItem('moodEntries');
-    const savedTests = localStorage.getItem('testResults');
-    const savedFavorites = localStorage.getItem('favoriteTechniques');
-
+    const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const userData = JSON.parse(savedUser);
+      setUser(userData);
       setIsAuthenticated(true);
+      loadUserData(userData.email);
     }
+  }, []);
+
+  const loadUserData = (email: string) => {
+    const userKey = `user_${email}`;
+    const savedMoods = localStorage.getItem(`${userKey}_moods`);
+    const savedTests = localStorage.getItem(`${userKey}_tests`);
+    const savedFavorites = localStorage.getItem(`${userKey}_favorites`);
+
     if (savedMoods) setMoodEntries(JSON.parse(savedMoods));
     if (savedTests) setTestResults(JSON.parse(savedTests));
     if (savedFavorites) setFavoriteTechniques(JSON.parse(savedFavorites));
-  }, []);
+  };
 
-  const handleAuth = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const userData = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-    };
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    const name = formData.get('name') as string;
+
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
     
-    localStorage.setItem('user', JSON.stringify(userData));
+    if (users[email]) {
+      toast({
+        title: '❌ Ошибка',
+        description: 'Пользователь с таким email уже существует',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const userData = { name, email, password };
+    users[email] = userData;
+    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    
     setUser(userData);
     setIsAuthenticated(true);
     
     toast({
       title: '✨ Добро пожаловать!',
-      description: 'Начните с записи в дневник настроения',
+      description: 'Аккаунт успешно создан',
+    });
+  };
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const userData = users[email];
+
+    if (!userData || userData.password !== password) {
+      toast({
+        title: '❌ Ошибка',
+        description: 'Неверный email или пароль',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    localStorage.setItem('currentUser', JSON.stringify(userData));
+    setUser(userData);
+    setIsAuthenticated(true);
+    loadUserData(email);
+    
+    toast({
+      title: '👋 С возвращением!',
+      description: `Рады видеть вас, ${userData.name}`,
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    setUser(null);
+    setIsAuthenticated(false);
+    setMoodEntries([]);
+    setTestResults([]);
+    setFavoriteTechniques([]);
+    setActiveTab('dashboard');
+    
+    toast({
+      title: '👋 До встречи!',
+      description: 'Вы успешно вышли из аккаунта',
     });
   };
 
@@ -209,7 +413,9 @@ function Index() {
     
     const updated = [newEntry, ...moodEntries];
     setMoodEntries(updated);
-    localStorage.setItem('moodEntries', JSON.stringify(updated));
+    
+    const userKey = `user_${user?.email}`;
+    localStorage.setItem(`${userKey}_moods`, JSON.stringify(updated));
     
     setShowMoodDialog(false);
     setCurrentMood({ emotion: '', stress: 5, note: '' });
@@ -280,7 +486,9 @@ function Index() {
 
     const updated = [result, ...testResults];
     setTestResults(updated);
-    localStorage.setItem('testResults', JSON.stringify(updated));
+    
+    const userKey = `user_${user?.email}`;
+    localStorage.setItem(`${userKey}_tests`, JSON.stringify(updated));
 
     setCurrentTest(null);
     setActiveTab('profile');
@@ -297,7 +505,9 @@ function Index() {
       : [...favoriteTechniques, id];
     
     setFavoriteTechniques(updated);
-    localStorage.setItem('favoriteTechniques', JSON.stringify(updated));
+    
+    const userKey = `user_${user?.email}`;
+    localStorage.setItem(`${userKey}_favorites`, JSON.stringify(updated));
   };
 
   const exportData = () => {
@@ -323,7 +533,11 @@ function Index() {
 
   const deleteAllData = () => {
     if (confirm('Вы уверены? Все данные будут удалены безвозвратно.')) {
-      localStorage.clear();
+      const userKey = `user_${user?.email}`;
+      localStorage.removeItem(`${userKey}_moods`);
+      localStorage.removeItem(`${userKey}_tests`);
+      localStorage.removeItem(`${userKey}_favorites`);
+      
       setMoodEntries([]);
       setTestResults([]);
       setFavoriteTechniques([]);
@@ -335,59 +549,127 @@ function Index() {
     }
   };
 
+  const getRecommendedTest = () => {
+    const recentMoods = moodEntries.slice(0, 5);
+    const anxiousCount = recentMoods.filter(m => m.emotion === 'anxious').length;
+    const stressCount = recentMoods.filter(m => m.stress >= 7).length;
+    const sadCount = recentMoods.filter(m => m.emotion === 'sad').length;
+
+    if (anxiousCount >= 2) return tests.find(t => t.id === 'anxiety');
+    if (stressCount >= 3) return tests.find(t => t.id === 'stress');
+    if (sadCount >= 2) return tests.find(t => t.id === 'depression');
+    return tests[0];
+  };
+
+  const getRecommendedTechniques = () => {
+    const recentMoods = moodEntries.slice(0, 5);
+    const avgStress = recentMoods.reduce((sum, m) => sum + m.stress, 0) / (recentMoods.length || 1);
+
+    if (avgStress >= 7) {
+      return techniques.filter(t => t.category === 'Дыхательные практики' || t.category === 'Релаксация').slice(0, 3);
+    } else if (avgStress >= 4) {
+      return techniques.filter(t => t.category === 'Осознанность').slice(0, 3);
+    } else {
+      return techniques.filter(t => t.category === 'Физическая активность' || t.category === 'Творчество').slice(0, 3);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md animate-scale-in gradient-card border-none shadow-2xl">
           <CardHeader className="text-center">
             <CardTitle className="text-4xl mb-2">
-              <span className="text-gradient">MindCare</span>
+              <span className="text-gradient">Забота о себе</span>
             </CardTitle>
             <CardDescription className="text-lg">
               Ваше пространство ментального здоровья
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Имя</Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  placeholder="Как к вам обращаться?" 
-                  required 
-                  className="border-purple-200"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
-                  placeholder="your@email.com" 
-                  required 
-                  className="border-purple-200"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Пароль</Label>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
-                  placeholder="••••••••" 
-                  required 
-                  className="border-purple-200"
-                />
-              </div>
-              <Button 
-                type="submit" 
-                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-              >
-                Начать путь к гармонии
-              </Button>
-            </form>
+            <Tabs value={isRegistering ? 'register' : 'login'} onValueChange={(v) => setIsRegistering(v === 'register')}>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="login">Вход</TabsTrigger>
+                <TabsTrigger value="register">Регистрация</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email">Email</Label>
+                    <Input 
+                      id="login-email" 
+                      name="email" 
+                      type="email" 
+                      placeholder="your@email.com" 
+                      required 
+                      className="border-purple-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password">Пароль</Label>
+                    <Input 
+                      id="login-password" 
+                      name="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      required 
+                      className="border-purple-200"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                  >
+                    Войти
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="register">
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="register-name">Имя</Label>
+                    <Input 
+                      id="register-name" 
+                      name="name" 
+                      placeholder="Как к вам обращаться?" 
+                      required 
+                      className="border-purple-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email</Label>
+                    <Input 
+                      id="register-email" 
+                      name="email" 
+                      type="email" 
+                      placeholder="your@email.com" 
+                      required 
+                      className="border-purple-200"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Пароль</Label>
+                    <Input 
+                      id="register-password" 
+                      name="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      required 
+                      minLength={6}
+                      className="border-purple-200"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                  >
+                    Зарегистрироваться
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>
@@ -433,19 +715,22 @@ function Index() {
     );
   }
 
+  const recommendedTest = getRecommendedTest();
+  const recommendedTechniques = getRecommendedTechniques();
+
   return (
     <>
       <div className="min-h-screen p-4 pb-24">
         <div className="max-w-6xl mx-auto">
           <header className="text-center mb-8 animate-slide-up">
             <h1 className="text-5xl font-bold mb-2">
-              <span className="text-gradient">MindCare</span>
+              <span className="text-gradient">Забота о себе</span>
             </h1>
             <p className="text-muted-foreground">Привет, {user?.name}! 👋</p>
           </header>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 bg-white/70 backdrop-blur">
+            <TabsList className="grid w-full grid-cols-5 bg-white/70 backdrop-blur">
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-purple-100">
                 <Icon name="Home" size={18} className="mr-2" />
                 Главная
@@ -461,6 +746,10 @@ function Index() {
               <TabsTrigger value="techniques" className="data-[state=active]:bg-purple-100">
                 <Icon name="Heart" size={18} className="mr-2" />
                 Техники
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="data-[state=active]:bg-purple-100">
+                <Icon name="User" size={18} className="mr-2" />
+                Профиль
               </TabsTrigger>
             </TabsList>
 
@@ -503,40 +792,74 @@ function Index() {
                 </Card>
               </div>
 
-              <Card className="gradient-card border-none shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Icon name="Lightbulb" size={24} className="text-purple-500" />
-                    Начните с малого
-                  </CardTitle>
-                  <CardDescription>Рекомендации для вас</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button 
-                    onClick={() => setShowMoodDialog(true)}
-                    className="w-full justify-start bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                  >
-                    <Icon name="Plus" size={18} className="mr-2" />
-                    Добавить запись в дневник
-                  </Button>
-                  <Button 
-                    onClick={() => setActiveTab('tests')}
-                    variant="outline"
-                    className="w-full justify-start hover:bg-purple-50"
-                  >
-                    <Icon name="ClipboardList" size={18} className="mr-2" />
-                    Пройти тест на тревожность
-                  </Button>
-                  <Button 
-                    onClick={() => setActiveTab('techniques')}
-                    variant="outline"
-                    className="w-full justify-start hover:bg-purple-50"
-                  >
-                    <Icon name="Heart" size={18} className="mr-2" />
-                    Попробовать технику дыхания
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="flex justify-center">
+                <Button 
+                  onClick={() => setShowMoodDialog(true)}
+                  size="lg"
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                >
+                  <Icon name="Plus" size={20} className="mr-2" />
+                  Добавить запись в дневник
+                </Button>
+              </div>
+
+              {moodEntries.length > 0 && (
+                <Card className="gradient-card border-none shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Icon name="Sparkles" size={24} className="text-purple-500" />
+                      Рекомендации для вас
+                    </CardTitle>
+                    <CardDescription>На основе ваших записей</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {recommendedTest && (
+                      <Card className="border-l-4 border-l-purple-500">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base">Рекомендуем пройти тест</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <p className="font-medium">{recommendedTest.name}</p>
+                          <Button 
+                            onClick={() => startTest(recommendedTest)}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            Пройти тест
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {recommendedTechniques.length > 0 && (
+                      <Card className="border-l-4 border-l-green-500">
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-base">Рекомендуемые техники</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          {recommendedTechniques.map((tech) => (
+                            <div key={tech.id} className="flex items-center justify-between p-2 rounded hover:bg-purple-50">
+                              <div className="flex-1">
+                                <p className="font-medium text-sm">{tech.title}</p>
+                                <p className="text-xs text-muted-foreground">{tech.category}</p>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveTab('techniques');
+                                }}
+                              >
+                                <Icon name="ArrowRight" size={16} />
+                              </Button>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
 
             <TabsContent value="diary" className="space-y-6 animate-fade-in">
@@ -687,71 +1010,77 @@ function Index() {
                 </CardContent>
               </Card>
             </TabsContent>
-          </Tabs>
 
-          <Card className="mt-6 gradient-card border-none shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Icon name="User" size={24} className="text-purple-500" />
-                Личный кабинет
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Имя</Label>
-                <p className="text-lg font-medium">{user?.name}</p>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <p className="text-lg font-medium">{user?.email}</p>
-              </div>
-
-              {testResults.length > 0 && (
-                <div>
-                  <Label className="text-base mb-3 block">Результаты тестов</Label>
-                  <div className="space-y-3">
-                    {testResults.map((result) => (
-                      <Card key={result.id}>
-                        <CardContent className="pt-6">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <p className="font-semibold">{result.testName}</p>
-                              <Badge>{result.level}</Badge>
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {new Date(result.date).toLocaleDateString('ru-RU')}
-                            </p>
-                            <div className="mt-3">
-                              <p className="text-sm font-medium mb-2">Рекомендации:</p>
-                              <ul className="text-sm space-y-1">
-                                {result.recommendations.map((rec, idx) => (
-                                  <li key={idx} className="flex items-start gap-2">
-                                    <Icon name="Check" size={16} className="text-green-500 mt-0.5" />
-                                    {rec}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+            <TabsContent value="profile" className="space-y-6 animate-fade-in">
+              <Card className="gradient-card border-none shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Icon name="User" size={24} className="text-purple-500" />
+                    Личный кабинет
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Имя</Label>
+                    <p className="text-lg font-medium">{user?.name}</p>
                   </div>
-                </div>
-              )}
+                  <div>
+                    <Label>Email</Label>
+                    <p className="text-lg font-medium">{user?.email}</p>
+                  </div>
 
-              <div className="pt-4 space-y-2">
-                <Button onClick={exportData} variant="outline" className="w-full">
-                  <Icon name="Download" size={18} className="mr-2" />
-                  Экспорт данных
-                </Button>
-                <Button onClick={deleteAllData} variant="destructive" className="w-full">
-                  <Icon name="Trash2" size={18} className="mr-2" />
-                  Удалить все данные
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  {testResults.length > 0 && (
+                    <div>
+                      <Label className="text-base mb-3 block">Результаты тестов</Label>
+                      <div className="space-y-3">
+                        {testResults.map((result) => (
+                          <Card key={result.id}>
+                            <CardContent className="pt-6">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <p className="font-semibold">{result.testName}</p>
+                                  <Badge>{result.level}</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  {new Date(result.date).toLocaleDateString('ru-RU')}
+                                </p>
+                                <div className="mt-3">
+                                  <p className="text-sm font-medium mb-2">Рекомендации:</p>
+                                  <ul className="text-sm space-y-1">
+                                    {result.recommendations.map((rec, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <Icon name="Check" size={16} className="text-green-500 mt-0.5" />
+                                        {rec}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4 space-y-2">
+                    <Button onClick={exportData} variant="outline" className="w-full">
+                      <Icon name="Download" size={18} className="mr-2" />
+                      Экспорт данных
+                    </Button>
+                    <Button onClick={deleteAllData} variant="outline" className="w-full">
+                      <Icon name="Trash2" size={18} className="mr-2" />
+                      Удалить все данные
+                    </Button>
+                    <Button onClick={handleLogout} variant="destructive" className="w-full">
+                      <Icon name="LogOut" size={18} className="mr-2" />
+                      Выйти из аккаунта
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <Dialog open={showMoodDialog} onOpenChange={setShowMoodDialog}>
