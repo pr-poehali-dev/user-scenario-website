@@ -1064,10 +1064,6 @@ function Index() {
                   )}
 
                   <div className="pt-4 space-y-2">
-                    <Button onClick={exportData} variant="outline" className="w-full">
-                      <Icon name="Download" size={18} className="mr-2" />
-                      Экспорт данных
-                    </Button>
                     <Button onClick={deleteAllData} variant="outline" className="w-full">
                       <Icon name="Trash2" size={18} className="mr-2" />
                       Удалить все данные
